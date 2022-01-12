@@ -1,11 +1,12 @@
 import './App.css';
+import ScreenRoot from '../ScreenRoot';
 
 function App() {
-  return (
-    <div className="App">
-     <h1>Spotify clone</h1>
-    </div>
-  );
+	return (
+		<div className="App">
+			<ScreenRoot />
+		</div>
+	);
 }
 
 export default App;

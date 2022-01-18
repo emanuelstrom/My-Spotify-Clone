@@ -14,8 +14,9 @@ import {
 import { useParams } from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SongRow from '../SongRow/SongRow';
+import { connect } from 'react-redux';
 
-const Playlist = ({ spotifyApi }) => {
+const Playlist = ({ spotifyApi, loading }) => {
 	const { playlistId } = useParams();
 	const [playlistInfo, setPlaylistInfo] = useState();
 	const [songs, setSongs] = useState([]);
@@ -37,7 +38,7 @@ const Playlist = ({ spotifyApi }) => {
 	}, [playlistId]);
 
 	const renderSongRows = () => {
-		if (!songs) return [1, 2, 3, 4, 5, 6].map((e, i) => <SongRow loading={true} key={i} />);
+		if (loading) return [1, 2, 3, 4, 5, 6].map((e, i) => <SongRow loading={true} key={i} />);
 		return songs.map((song, i) => (
 			<SongRow spotifyApi={spotifyApi} playlistId={playlistId} {...song} key={i} index={i} />
 		));
@@ -98,4 +99,9 @@ const Playlist = ({ spotifyApi }) => {
 	);
 };
 
-export default Playlist;
+const mapState = (state) => {
+	return {
+		loading: state.playlist.loading
+	};
+};
+export default connect(mapState)(Playlist);

@@ -5,29 +5,37 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
+import { connect } from 'react-redux';
+import {
+	play,
+	pause,
+	updateSongInfo,
+	updateSongInfoStart,
+	playNewSong,
+	setProgress
+} from '../../reduxStore/actions/index';
 
-const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
+const Player = ({
+	spotifyApi,
+	deviceId,
+	pause,
+	play,
+	playing,
+	updateSongInfo,
+	updateSongInfoStart,
+	title,
+	image,
+	artist,
+	duration,
+	progress,
+	loading,
+	playNewSong,
+	setProgress
+}) => {
 	const [volume, setVolume] = useState(30);
-	const [playing, setPlaying] = useState(false);
-	const [songInfo, setSongInfo] = useState({});
-	const [songProgress, setSongProgress] = useState({});
 
 	useEffect(() => {
-		const getStartSongInfo = async () => {
-			const recentlyPlayedSongs = await spotifyApi.getMyRecentlyPlayedTracks({ limit: 1 });
-			const item = recentlyPlayedSongs.body.items[0].track;
-
-			const duration = item.duration_ms / 1000;
-			const progress = 0;
-			setSongInfo({
-				title: item.name,
-				image: item.album.images[1],
-				artist: item.artists[0].name,
-				duration
-			});
-			setSongProgress(progress);
-		};
-		getStartSongInfo();
+		updateSongInfoStart(spotifyApi);
 	}, []);
 
 	const formatTime = (value) => {
@@ -41,49 +49,61 @@ const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
 		let interval = null;
 		if (playing) {
 			interval = setInterval(() => {
-				setSongProgress((songProgress) => songProgress + 1);
+				console.log('progress the song');
+				setProgress(progress + 1);
 			}, 1000);
-		} else if (!playing && songProgress !== 0) {
+		} else if (!playing && progress !== 0) {
 			clearInterval(interval);
 		}
 		return () => clearInterval(interval);
-	}, [playing, songProgress]);
+	}, [playing, progress]);
 
-	const togglePlay = async (isPlaying) => {
-		if (!isPlaying) {
+	const togglePlay = async () => {
+		if (loading) return;
+
+		if (!playing) {
 			try {
-				const transferPlayback = await spotifyApi.transferMyPlayback([deviceId]);
-				console.log({ transferPlayback });
-
-				const tryToPlay = await spotifyApi.play();
-				console.log({ tryToPlay });
-				updateSongInfo();
+				await spotifyApi.transferMyPlayback([deviceId]);
+				playNewSong(spotifyApi);
 			} catch (e) {
 				console.error(e);
 			}
 		} else {
+			pause();
 			const tryToPause = await spotifyApi.pause();
-			console.log({ tryToPause });
 		}
-	};
-
-	const updateSongInfo = async () => {
-		const currentSong = await spotifyApi.getMyCurrentPlayingTrack();
-		// console.log(currentSong.body)
-		const item = currentSong.body.item;
-		const duration = item.duration_ms / 1000;
-		const progress = currentSong.body.progress_ms / 1000;
-		setSongInfo({
-			title: item.name,
-			image: item.album.images[1],
-			artist: item.artists[0].name,
-			duration
-		});
-		setSongProgress(progress);
 	};
 
 	const handleVolumeChange = (event, newValue) => {
 		setVolume(newValue);
+	};
+
+	// konstig bugg
+
+	/* 	const handleOnSkipPrev = async () => {
+		if (loading) return;
+		await spotifyApi.skipToPrevious();
+		playNewSong(spotifyApi);
+	};
+
+	const handleOnSkipNext = async () => {
+		if (loading) return;
+		await spotifyApi.skipToNext();
+		playNewSong(spotifyApi);
+	}; */
+
+	const handleOnSkipPrev = async () => {
+		if (loading) return;
+		play();
+		await spotifyApi.skipToPrevious();
+		updateSongInfo(spotifyApi);
+	};
+
+	const handleOnSkipNext = async () => {
+		if (loading) return;
+		play();
+		await spotifyApi.skipToNext();
+		updateSongInfo(spotifyApi);
 	};
 
 	const sliderStyle = {
@@ -128,17 +148,17 @@ const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
 				<Grid item xs={4} md={3} sx={{ display: 'flex', alignItems: 'center' }}>
 					<Stack direction="row" spacing={4}>
 						<Avatar
-							alt={songInfo.title}
-							src={songInfo.image ? songInfo.image.url : ''}
+							alt={title}
+							src={image ? image.url : ''}
 							variant="square"
 							sx={{ width: 56, height: 56, display: { xs: 'none', md: 'block' } }}
 						/>
 						<Box>
 							<Typography variant="subtitle1" sx={{ color: 'text.primary' }}>
-								{songInfo.title}
+								{title}
 							</Typography>
 							<Typography variant="caption" sx={{ color: 'text.secondary' }}>
-								{songInfo.artist}
+								{artist}
 							</Typography>
 						</Box>
 					</Stack>
@@ -146,53 +166,24 @@ const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
 				<Grid item xs={8} md={6}>
 					<Stack spacing={0} direction="column" alignItems="center">
 						<Stack spacing={2} direction="row" alignItems="center">
-							<IconButton
-								size="small"
-								sx={{ color: 'white' }}
-								onClick={async () => {
-									console.log('Skip prev');
-									setPlaying(true);
-									await spotifyApi.skipToPrevious();
-									updateSongInfo();
-								}}
-							>
+							<IconButton size="small" sx={{ color: 'white' }} onClick={handleOnSkipPrev}>
 								<SkipPreviousIcon />
 							</IconButton>
-							<IconButton
-								size="small"
-								sx={{ color: 'white' }}
-								onClick={() => {
-									setPlaying((v) => !v);
-									togglePlay(playing);
-								}}
-							>
+							<IconButton size="small" sx={{ color: 'white' }} onClick={togglePlay}>
 								{playing ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
 							</IconButton>
-							<IconButton
-								size="small"
-								sx={{ color: 'white' }}
-								onClick={async () => {
-									console.log('Skip next');
-									try {
-										setPlaying(true);
-										await spotifyApi.skipToNext();
-										updateSongInfo();
-									} catch (e) {
-										console.error(e);
-									}
-								}}
-							>
+							<IconButton size="small" sx={{ color: 'white' }} onClick={handleOnSkipNext}>
 								<SkipNextIcon />
 							</IconButton>
 						</Stack>
 						<Stack spacing={2} direction="row" alignItems="center">
 							<Typography variant="body1" sx={{ color: 'text.secondary' }}>
-								{formatTime(songProgress)}
+								{formatTime(progress)}
 							</Typography>
 							<Slider
 								sx={sliderStyle}
 								size="medium"
-								value={songProgress}
+								value={progress}
 								aria-label="Default"
 								valueLabelDisplay="auto"
 								onChange={() => {
@@ -200,7 +191,7 @@ const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
 								}}
 							/>
 							<Typography variant="body1" sx={{ color: 'text.secondary' }}>
-								{formatTime(songInfo.duration)}
+								{formatTime(duration)}
 							</Typography>
 						</Stack>
 					</Stack>
@@ -209,12 +200,22 @@ const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
 					item
 					xs={0}
 					md={3}
-					sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'end', alignItems: 'center' }}
+					sx={{
+						display: { xs: 'none', md: 'flex' },
+						justifyContent: 'end',
+						alignItems: 'center',
+						color: 'text.primary'
+					}}
 				>
 					<Box sx={{ width: 200 }}>
 						<Stack spacing={2} direction="row" alignItems="center">
 							<VolumeDown />
-							<Slider aria-label="Volume" value={volume} onChange={handleVolumeChange} />
+							<Slider
+								aria-label="Volume"
+								value={volume}
+								onChange={handleVolumeChange}
+								sx={{ color: 'text.primary' }}
+							/>
 							<VolumeUp />
 						</Stack>
 					</Box>
@@ -224,4 +225,29 @@ const Player = ({ spotifyApi, deviceId, image, title, artist }) => {
 	);
 };
 
-export default Player;
+const mapState = (state) => {
+	const { title, image, artist, duration, progress, device_id, playing, loading } = state.player;
+	return {
+		deviceId: device_id,
+		playing,
+		title,
+		image,
+		artist,
+		duration,
+		progress,
+		loading
+	};
+};
+
+const mapDispatch = (dispatch) => {
+	return {
+		play: () => dispatch(play()),
+		pause: () => dispatch(pause()),
+		updateSongInfo: (spotifyApi) => dispatch(updateSongInfo(spotifyApi)),
+		updateSongInfoStart: (spotifyApi) => dispatch(updateSongInfoStart(spotifyApi)),
+		playNewSong: (spotifyApi) => dispatch(playNewSong(spotifyApi)),
+		setProgress: (progress) => dispatch(setProgress(progress))
+	};
+};
+
+export default connect(mapState, mapDispatch)(Player);

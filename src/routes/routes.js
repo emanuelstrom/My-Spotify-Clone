@@ -1,12 +1,9 @@
 import Library from '../components/Library/Library';
 import Playlist from '../components/Playlist/Playlist';
+import Home from '../components/Home/Home';
 
 const NoMatch = () => {
 	return <div>404</div>;
-};
-
-const Home = () => {
-	return <div>Home</div>;
 };
 
 const Search = () => {

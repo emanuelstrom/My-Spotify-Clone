@@ -48,6 +48,11 @@ export const mainTheme = createTheme({
 			light: '#1ed760',
 			dark: '#3B5249',
 			contrastText: '#fff'
+		},
+		secondary: {
+			light: '#a7a7a7',
+			main: '#fff',
+			contrastText: '#fff'
 		}
 	},
 	typography: {

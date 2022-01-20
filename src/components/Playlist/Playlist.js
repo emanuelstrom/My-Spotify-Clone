@@ -13,8 +13,9 @@ import {
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SongRow from '../SongRow/SongRow';
+// import SongRow from '../SongRow/SongRow';
 import { connect } from 'react-redux';
+import TableOfSongs from '../TableOfSongs/TableOfSongs';
 
 const Playlist = ({ spotifyApi, loading }) => {
 	const { playlistId } = useParams();
@@ -32,17 +33,18 @@ const Playlist = ({ spotifyApi, loading }) => {
 			});
 
 			const allSongs = await spotifyApi.getPlaylistTracks(playlistId);
+			console.log(allSongs);
 			setSongs(allSongs.body.items);
 		};
 		getData();
 	}, [playlistId]);
 
-	const renderSongRows = () => {
+	/* 	const renderSongRows = () => {
 		if (loading) return [1, 2, 3, 4, 5, 6].map((e, i) => <SongRow loading={true} key={i} />);
 		return songs.map((song, i) => (
 			<SongRow spotifyApi={spotifyApi} playlistId={playlistId} {...song} key={i} index={i} />
 		));
-	};
+	}; */
 
 	return (
 		<Box
@@ -80,7 +82,7 @@ const Playlist = ({ spotifyApi, loading }) => {
 					</Fab>
 				</Grid>
 				<Grid item sm={12}>
-					<TableContainer>
+					{/* <TableContainer>
 						<Table size="small" padding="none">
 							<TableHead sx={{ display: { xs: 'none', md: 'table-header-group' } }}>
 								<TableRow>
@@ -92,7 +94,8 @@ const Playlist = ({ spotifyApi, loading }) => {
 							</TableHead>
 							<TableBody>{renderSongRows()}</TableBody>
 						</Table>
-					</TableContainer>
+					</TableContainer> */}
+					<TableOfSongs loading={loading} spotifyApi={spotifyApi} playlistId={playlistId} songs={songs} />
 				</Grid>
 			</Grid>
 		</Box>

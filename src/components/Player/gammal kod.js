@@ -5,23 +5,25 @@ import PauseIcon from '@mui/icons-material/Pause';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import { connect } from 'react-redux';
-import {
-	pause,
-	updateSongInfoStart,
-	playNewSong,
-	setProgress,
-	play,
-	updateSongInfo
-} from '../../reduxStore/actions/index';
-import VolumeController from '../VolumeController/VolumeController';
 import SongProgress from '../SongProgress/SongProgress';
 
-const Player = ({
+import {
 	play,
+	pause,
+	updateSongInfo,
+	updateSongInfoStart,
+	playNewSong,
+	setProgress
+} from '../../reduxStore/actions/index';
+import VolumeController from '../VolumeController/VolumeController';
+
+const Player = ({
 	spotifyApi,
 	deviceId,
 	pause,
+	play,
 	playing,
+	updateSongInfo,
 	updateSongInfoStart,
 	title,
 	image,
@@ -30,12 +32,30 @@ const Player = ({
 	progress,
 	loading,
 	playNewSong,
-	setProgress,
-	updateSongInfo
+	setProgress
 }) => {
 	useEffect(() => {
 		updateSongInfoStart(spotifyApi);
 	}, []);
+
+	/* 	const formatTime = (value) => {
+		const rest = (value % 60).toFixed(0);
+		const min = Math.floor(value / 60);
+		const seconds = rest < 10 ? `0${rest}` : rest;
+		return `${min}:${seconds}`;
+	}; */
+
+	useEffect(() => {
+		let interval = null;
+		if (playing) {
+			interval = setInterval(() => {
+				setProgress(progress + 1);
+			}, 1000);
+		} else if (!playing && progress !== 0) {
+			clearInterval(interval);
+		}
+		return () => clearInterval(interval);
+	}, [playing, progress]);
 
 	const togglePlay = async () => {
 		if (loading) return;
@@ -53,6 +73,20 @@ const Player = ({
 		}
 	};
 
+	// konstig bugg
+
+	/* 	const handleOnSkipPrev = async () => {
+		if (loading) return;
+		await spotifyApi.skipToPrevious();
+		playNewSong(spotifyApi);
+	};
+
+	const handleOnSkipNext = async () => {
+		if (loading) return;
+		await spotifyApi.skipToNext();
+		playNewSong(spotifyApi);
+	}; */
+
 	const handleOnSkipPrev = async () => {
 		if (loading) return;
 		play();
@@ -67,6 +101,30 @@ const Player = ({
 		updateSongInfo(spotifyApi);
 	};
 
+	/* 	const sliderStyle = {
+		color: '#fff',
+		height: 4,
+		width: { xs: 100, md: 250 },
+		'& .MuiSlider-thumb': {
+			width: 8,
+			height: 8,
+			transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
+			'&:before': {
+				boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)'
+			},
+			'&:hover, &.Mui-focusVisible': {
+				boxShadow: `0px 0px 0px 8px 'rgb(0 0 0 / 16%)`
+			},
+			'&.Mui-active': {
+				width: 20,
+				height: 20
+			}
+		},
+		'& .MuiSlider-rail': {
+			opacity: 0.28
+		}
+	};
+ */
 	return (
 		<Box
 			p={1}
@@ -82,13 +140,13 @@ const Player = ({
 			}}
 		>
 			<Grid container spacing={2}>
-				<Grid item xs={4} md={3} sx={{ display: 'flex', alignItems: 'center', paddingLeft: '150px' }}>
-					<Stack direction="row" spacing={2}>
+				<Grid item xs={4} md={3} sx={{ display: 'flex', alignItems: 'center' }}>
+					<Stack direction="row" spacing={4}>
 						<Avatar
 							alt={title}
 							src={image ? image.url : ''}
 							variant="square"
-							sx={{ width: 56, height: 56, paddingLeft: '5px', display: { xs: 'none', md: 'block' } }}
+							sx={{ width: 56, height: 56, display: { xs: 'none', md: 'block' } }}
 						/>
 						<Box>
 							<Typography variant="subtitle1" sx={{ color: 'text.primary' }}>
@@ -113,7 +171,25 @@ const Player = ({
 								<SkipNextIcon />
 							</IconButton>
 						</Stack>
-						<SongProgress spotifyApi={spotifyApi} />
+						<Stack spacing={2} direction="row" alignItems="center">
+							<Typography variant="body1" sx={{ color: 'text.secondary' }}>
+								{formatTime(progress)}
+							</Typography>
+							<Slider
+								sx={sliderStyle}
+								size="medium"
+								value={progress}
+								aria-label="Default"
+								valueLabelDisplay="auto"
+								onChange={() => {
+									console.log('Move through the song');
+								}}
+							/>
+							<Typography variant="body1" sx={{ color: 'text.secondary' }}>
+								{formatTime(duration)}
+							</Typography>
+						</Stack>
+						<SongProgress />
 					</Stack>
 				</Grid>
 				<Grid
@@ -124,7 +200,7 @@ const Player = ({
 						display: { xs: 'none', md: 'flex' },
 						justifyContent: 'end',
 						alignItems: 'center',
-						width: '200px !important'
+						color: 'text.primary'
 					}}
 				>
 					<VolumeController spotifyApi={spotifyApi} />

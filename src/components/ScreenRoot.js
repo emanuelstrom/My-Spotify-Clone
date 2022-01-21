@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import SpotifyWebApi from 'spotify-web-api-node';
 
 import { ROUTES } from '../routes/routes';

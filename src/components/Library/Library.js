@@ -5,7 +5,6 @@ import PlaylistItem from '../PlaylistItem/PlaylistItem';
 import { connect } from 'react-redux';
 
 function Library({ playlists, loading }) {
-	console.log(playlists);
 	const renderPlaylistItems = () => {
 		if (loading) return [1, 2, 3, 4, 5, 6].map((e, i) => <PlaylistItem key={i} loading={true} />);
 		return playlists.map((playlist, i) => <PlaylistItem {...playlist} key={i} />);

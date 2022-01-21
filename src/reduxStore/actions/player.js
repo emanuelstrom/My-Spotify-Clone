@@ -1,4 +1,3 @@
-import { Store } from '@mui/icons-material';
 import * as actionTypes from './actionTypes';
 
 export const play = () => {

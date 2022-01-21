@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import debounce from 'lodash.debounce';
 
 const VolumeController = ({ spotifyApi }) => {
-	const defaultVolume = 40;
+	const defaultVolume = 50;
 	const [volume, setVolume] = useState(defaultVolume);
 
 	const handleVolumeChange = (e, v) => {
@@ -15,8 +15,7 @@ const VolumeController = ({ spotifyApi }) => {
 	const debouncedApiCall = useMemo(
 		(v) =>
 			debounce(async (v) => {
-				console.log(v);
-				spotifyApi.setVolume(v);
+				await spotifyApi.setVolume(v);
 			}, 1),
 		[volume, setVolume]
 	);
@@ -29,7 +28,7 @@ const VolumeController = ({ spotifyApi }) => {
 	}, []);
 
 	return (
-		<Box sx={{ width: '100%' }}>
+		<Box sx={{ width: '100%', maxWidth: '300px', marginRight: '10px' }}>
 			<Stack spacing={2} direction="row" alignItems="center">
 				{volume === 0 ? <VolumeOff sx={{ color: 'white' }} /> : <VolumeDown sx={{ color: 'white' }} />}
 				<Slider

@@ -43,7 +43,7 @@ function SideNav({ items, loading }) {
 				display: { xs: 'none', md: 'block' },
 				bgcolor: 'background.paper',
 				height: '100vh',
-				width: 240,
+				width: '240px',
 				top: 0,
 				left: 0
 			}}

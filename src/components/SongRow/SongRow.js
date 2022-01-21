@@ -2,7 +2,7 @@ import { TableCell, TableRow, Avatar, Typography, Skeleton, Box } from '@mui/mat
 import { connect } from 'react-redux';
 import { playNewSong } from '../../reduxStore/actions/index';
 
-const SongRow = ({ spotifyApi, playlistId, track, index, loading, playNewSong }) => {
+const SongRow = ({ spotifyApi, track, index, loading, playNewSong, contextUri, position }) => {
 	const style = {
 		'& td': { border: 0 },
 		cursor: 'pointer',
@@ -18,7 +18,7 @@ const SongRow = ({ spotifyApi, playlistId, track, index, loading, playNewSong })
 					<Skeleton variant="rectangular" width={20} height={30} />
 				</TableCell>
 				<TableCell>
-					<Skeleton variant="rectangular" width={50} height={50} />
+					<Skeleton variant="rectangular" width={30} height={30} />
 				</TableCell>
 				<TableCell align="right" sx={{ color: 'text.secondary', display: { xs: 'none', md: 'table-cell' } }}>
 					<Skeleton variant="rectangular" width={50} height={30} />
@@ -61,11 +61,12 @@ const SongRow = ({ spotifyApi, playlistId, track, index, loading, playNewSong })
 
 	const onRowClick = async () => {
 		const song = {
-			context_uri: `spotify:playlist:${playlistId}`,
+			context_uri: contextUri,
 			offset: {
-				position: index
+				position
 			}
 		};
+
 		playNewSong(spotifyApi, song);
 	};
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, InputBase, Paper, Grid, Typography } from '@mui/material';
+import { Box, InputBase, Grid, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TableOfSongs from '../TableOfSongs/TableOfSongs';
 
@@ -16,15 +16,21 @@ const Search = ({ spotifyApi }) => {
 	const [loading, setLoading] = useState(false);
 
 	const formatSongData = (tracks) => {
-		return tracks.map(({ album, name, artists, duration_ms, id }) => {
-			console.log('tracks: ', tracks);
-			return { track: { album, name, artists, duration_ms, id } };
+		return tracks.map((track) => {
+			return { track: { ...track, contextUri: track.album.uri, position: track.track_number - 1 } };
 		});
 	};
 
 	const handleOnChange = async (e) => {
 		setLoading(true);
 		const { value } = e.target;
+
+		if (value === '') {
+			setSongs(null);
+			setLoading(false);
+			return;
+		}
+
 		try {
 			const result = await spotifyApi.searchTracks(value);
 			const { items } = result.body.tracks;
@@ -66,12 +72,7 @@ const Search = ({ spotifyApi }) => {
 					{songs === null ? (
 						<Typography>Search for Songs</Typography>
 					) : (
-						<TableOfSongs
-							loading={loading}
-							spotifyApi={spotifyApi}
-							playlistId={'playlistId'}
-							songs={songs}
-						/>
+						<TableOfSongs loading={loading} spotifyApi={spotifyApi} playlistId={false} songs={songs} />
 					)}
 				</Grid>
 			</Grid>

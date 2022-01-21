@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Box, Grid, Typography, Avatar, Stack, Slider, IconButton } from '@mui/material';
+import { Box, Grid, Typography, Avatar, Stack, IconButton } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
@@ -26,11 +26,8 @@ const Player = ({
 	title,
 	image,
 	artist,
-	duration,
-	progress,
 	loading,
 	playNewSong,
-	setProgress,
 	updateSongInfo
 }) => {
 	useEffect(() => {

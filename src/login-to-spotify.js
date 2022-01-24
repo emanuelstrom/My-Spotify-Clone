@@ -1,7 +1,7 @@
 // https://developer.spotify.com/documentation/web-playback-sdk/quick-start/#
 const authEndpoint = 'https://accounts.spotify.com/authorize';
 // Replace with your app's client ID, redirect URI and desired scopes
-const clientId = 'cff76213089a4e228206c8bf120d67cb'; // my id'b142342349dc4e00bae810bf56fddf20';
+const clientId = 'b142342349dc4e00bae810bf56fddf20';
 const redirectUri = 'https://emanuel-spotify.herokuapp.com/';
 const scopes = [
 	'user-read-currently-playing',
